@@ -1,1 +1,20 @@
-[{"id":"u0001","author":"Pratik Karanjule","message":"Testing the team updates log feature","timestamp":"2026-06-03T07:35:00","status":"ontrack","classification":"task","resolved":false}]
+[
+  {
+    "id": "u0001",
+    "author": "Pratik Karanjule",
+    "message": "Testing the team updates log feature",
+    "timestamp": "2026-06-03T07:35:00",
+    "status": "ontrack",
+    "classification": "task",
+    "resolved": false
+  },
+  {
+    "id": "u0002",
+    "author": "Sachin Mourya",
+    "message": "Auth service is blocked waiting on DevOps certs",
+    "timestamp": "2026-06-03T08:54:21.126547",
+    "status": "blocked",
+    "classification": "blocker",
+    "resolved": false
+  }
+]
