@@ -16,5 +16,14 @@
     "status": "blocked",
     "classification": "blocker",
     "resolved": false
+  },
+  {
+    "id": "u0003",
+    "author": "Pratik Karanjule",
+    "message": "Frontend dashboard migration is 80% complete, finishing remaining 4 views this week",
+    "timestamp": "2026-06-03T08:58:16.567981",
+    "status": "ontrack",
+    "classification": "progress",
+    "resolved": false
   }
 ]
