@@ -34,5 +34,14 @@
     "status": "blocked",
     "classification": "blocker",
     "resolved": false
+  },
+  {
+    "id": "u0005",
+    "author": "Hitarth Rajpal",
+    "message": "Pipeline scaling delayed by 2 days",
+    "timestamp": "2026-06-03T09:06:46.030755",
+    "status": "delayed",
+    "classification": "delayed",
+    "resolved": false
   }
 ]
