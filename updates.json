@@ -25,5 +25,14 @@
     "status": "ontrack",
     "classification": "progress",
     "resolved": false
+  },
+  {
+    "id": "u0004",
+    "author": "Pratik Karanjule",
+    "message": "Blocked on staging deployment, waiting on infra team to provision the new cluster",
+    "timestamp": "2026-06-03T08:59:45.422119",
+    "status": "blocked",
+    "classification": "blocker",
+    "resolved": false
   }
 ]
