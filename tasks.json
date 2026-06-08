@@ -31,5 +31,16 @@
     "stream": "Unassigned",
     "created_at": "2026-06-08T06:28:05.623233",
     "updated_at": "2026-06-08T06:28:05.623250"
+  },
+  {
+    "id": "t004",
+    "title": "Test from sandbox",
+    "owner": "SandboxTest",
+    "status": "in-progress",
+    "created_from": null,
+    "github_issue": null,
+    "stream": "Unassigned",
+    "created_at": "2026-06-08T07:51:19.507335",
+    "updated_at": "2026-06-08T07:51:19.507348"
   }
 ]
