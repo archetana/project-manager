@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "date": "2026-06-08",
+    "tasks_completed": 0,
+    "blockers_active": 0,
+    "progress_pct": 0
+  }
+]
