@@ -34,5 +34,14 @@
     "status": "ontrack",
     "classification": "task",
     "resolved": false
+  },
+  {
+    "id": "u0005",
+    "author": "Test User",
+    "message": "testing exec tool works",
+    "timestamp": "2026-06-08T10:57:35.379052",
+    "status": "ontrack",
+    "classification": "task",
+    "resolved": false
   }
 ]
