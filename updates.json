@@ -27,15 +27,6 @@
     "resolved": false
   },
   {
-    "id": "u0004",
-    "author": "Test User",
-    "message": "Test timing measurement",
-    "timestamp": "2026-06-08T06:21:50.546286",
-    "status": "ontrack",
-    "classification": "task",
-    "resolved": false
-  },
-  {
     "id": "u0005",
     "author": "Suganya",
     "message": "working on Camera guided problem solving",
