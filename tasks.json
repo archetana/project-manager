@@ -42,5 +42,16 @@
     "stream": "Unassigned",
     "created_at": "2026-06-08T07:51:19.507335",
     "updated_at": "2026-06-08T07:51:19.507348"
+  },
+  {
+    "id": "t005",
+    "title": "NemoClaw sandbox onboarded on port 20000 - integration test",
+    "owner": "Copilot",
+    "status": "infra",
+    "created_from": null,
+    "github_issue": null,
+    "stream": "Unassigned",
+    "created_at": "2026-06-08T08:37:53.512581",
+    "updated_at": "2026-06-08T08:37:53.512608"
   }
 ]
