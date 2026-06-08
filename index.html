@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Team Status Board</title>
+    <meta name="description" content="NemoClaw Project Alpha - Real-time team status dashboard powered by AI">
+    <title>Project Alpha — NemoClaw Status Board</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -15,7 +16,18 @@
             --blocked: #ef4444;
             --border: #e2e8f0;
             --primary: #3b82f6;
+            --completed: #8b5cf6;
         }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -24,10 +36,11 @@
             line-height: 1.5;
             margin: 0;
             padding: 30px 15px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -45,16 +58,33 @@
             margin: 0;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .meta-info {
             font-size: 14px;
             color: var(--text-muted);
             text-align: right;
         }
 
-        /* Metrics Summary Dashboard */
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+        /* Summary Metrics */
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
@@ -66,22 +96,88 @@
             padding: 15px;
             text-align: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
         }
+        .summary-card:hover { transform: translateY(-2px); }
 
         .summary-card h3 {
             margin: 0 0 5px 0;
-            font-size: 13px;
+            font-size: 12px;
             text-transform: uppercase;
             color: var(--text-muted);
             letter-spacing: 0.5px;
         }
 
         .summary-number {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
         }
 
-        /* Main Content Structure */
+        /* Velocity Sparkline */
+        .velocity-chart {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .velocity-chart h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 60px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+            min-width: 20px;
+            position: relative;
+            transition: opacity 0.2s;
+        }
+        .chart-bar:hover { opacity: 0.8; }
+        .chart-bar .chart-label {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Board Layout */
         .section-title {
             font-size: 18px;
             margin: 0 0 15px 0;
@@ -98,6 +194,7 @@
 
         @media (max-width: 768px) {
             .board-layout { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .card {
@@ -109,16 +206,14 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        /* Work Streams / Streams Styles */
+        /* Work Streams */
         .stream-item {
             padding: 12px 0;
             border-bottom: 1px solid var(--border);
+            transition: opacity 0.3s;
         }
-
-        .stream-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
+        .stream-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .stream-item.hidden { display: none; }
 
         .stream-header {
             display: flex;
@@ -127,10 +222,7 @@
             margin-bottom: 5px;
         }
 
-        .stream-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
+        .stream-name { font-weight: 600; font-size: 15px; }
 
         .badge {
             font-size: 11px;
@@ -143,6 +235,7 @@
         .badge.ontrack { background: #ecfdf5; color: var(--ontrack); }
         .badge.delayed { background: #fffbeb; color: var(--delayed); }
         .badge.blocked { background: #fef2f2; color: var(--blocked); }
+        .badge.completed { background: #f5f3ff; color: var(--completed); }
 
         .stream-desc {
             font-size: 13px;
@@ -150,19 +243,16 @@
             margin: 0;
         }
 
-        /* Blockers Alert Design */
-        .blocker-box {
-            border-left: 4px solid var(--blocked);
-            background: #fef2f2;
-            padding: 12px 15px;
-            border-radius: 4px;
-            font-size: 13px;
-            margin-bottom: 10px;
+        .stream-owner {
+            font-size: 11px;
+            color: var(--primary);
+            margin-top: 4px;
+            font-weight: 500;
         }
 
         /* Progress Bar */
         .progress-container {
-            background: #e2e8f0;
+            background: var(--border);
             border-radius: 4px;
             height: 8px;
             width: 100%;
@@ -173,28 +263,103 @@
             background: var(--primary);
             height: 100%;
             border-radius: 4px;
+            transition: width 0.5s ease;
         }
 
+        /* Sidebar */
+        .blocker-box {
+            border-left: 4px solid var(--blocked);
+            background: #fef2f2;
+            padding: 12px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        [data-theme="dark"] .blocker-box { background: #1c1517; }
+
+        .milestone-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .milestone-item:last-child { border-bottom: none; }
+
+        .milestone-date {
+            font-weight: 700;
+            min-width: 55px;
+            font-size: 12px;
+        }
+
+        .milestone-countdown {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+        .milestone-countdown.urgent { background: #fef2f2; color: var(--blocked); }
+        .milestone-countdown.soon { background: #fffbeb; color: var(--delayed); }
+        .milestone-countdown.ok { background: #ecfdf5; color: var(--ontrack); }
+
+        /* Risk Alert */
+        .risk-banner {
+            background: linear-gradient(90deg, #fef2f2, #fffbeb);
+            border: 1px solid var(--blocked);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .risk-banner .risk-icon { font-size: 20px; }
+        [data-theme="dark"] .risk-banner { background: linear-gradient(90deg, #1c1517, #1c1a14); }
+
         /* Team Updates Log */
-        .updates-log {
-            margin-top: 30px;
+        .updates-log { margin-top: 30px; }
+
+        .updates-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
         .log-entry {
             display: flex;
             gap: 12px;
             padding: 12px 15px;
-            border-left: 3px solid var(--primary);
             background: var(--card-bg);
             border-radius: 0 8px 8px 0;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            align-items: center;
         }
+
+        .log-entry.status-ontrack { border-left: 3px solid var(--ontrack); }
+        .log-entry.status-blocked { border-left: 3px solid var(--blocked); }
+        .log-entry.status-delayed { border-left: 3px solid var(--delayed); }
+        .log-entry.status-task { border-left: 3px solid var(--primary); }
+
+        .log-entry .log-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .log-status-dot.ontrack { background: var(--ontrack); }
+        .log-status-dot.blocked { background: var(--blocked); }
+        .log-status-dot.delayed { background: var(--delayed); }
+        .log-status-dot.task { background: var(--primary); }
 
         .log-entry .log-author {
             font-weight: 700;
             font-size: 13px;
-            min-width: 120px;
+            min-width: 130px;
             color: var(--primary);
         }
 
@@ -209,6 +374,53 @@
             white-space: nowrap;
             align-self: center;
         }
+
+        /* Analytics Section */
+        .analytics-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .analytics-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .analytics-card h3 {
+            font-size: 14px;
+            margin: 0 0 12px 0;
+            color: var(--text-muted);
+        }
+
+        .analytics-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .analytics-item:last-child { border-bottom: none; }
+
+        .analytics-value { font-weight: 700; }
+        .analytics-value.warning { color: var(--delayed); }
+        .analytics-value.danger { color: var(--blocked); }
+        .analytics-value.good { color: var(--ontrack); }
+
+        /* Footer */
+        .dashboard-footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body>
@@ -217,29 +429,60 @@
         <header>
             <div>
                 <h1>Project Alpha Status</h1>
-                <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 14px;">Q2 Delivery Roadmap</p>
+                <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 14px;">Q2 Delivery Roadmap — NemoClaw Autonomous PM</p>
             </div>
-            <div class="meta-info">
-                <strong>Week 22 Update</strong><br>
-                <span>Last Updated: June 03, 2026</span>
+            <div class="header-right">
+                <div class="meta-info">
+                    <strong id="week-label">Week 23 Update</strong><br>
+                    <span id="last-updated">Last Updated: Loading...</span>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
             </div>
         </header>
 
+        <!-- Risk Banner (shown dynamically) -->
+        <div class="risk-banner" id="risk-banner" style="display: none;">
+            <span class="risk-icon">🚨</span>
+            <span id="risk-message"></span>
+        </div>
+
         <!-- Quick Metrics Dashboard -->
-        <div class="summary-grid">
+        <div class="summary-grid" id="summary-grid">
             <div class="summary-card" style="border-top: 4px solid var(--primary);">
                 <h3>Overall Progress</h3>
-                <div class="summary-number">80%</div>
-                <div class="progress-container"><div class="progress-bar" style="width: 80%;"></div></div>
+                <div class="summary-number" id="metric-progress">—</div>
+                <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%;"></div></div>
             </div>
             <div class="summary-card" style="border-top: 4px solid var(--ontrack);">
                 <h3>On Track</h3>
-                <div class="summary-number" style="color: var(--ontrack);">3</div>
+                <div class="summary-number" id="metric-ontrack" style="color: var(--ontrack);">—</div>
+            </div>
+            <div class="summary-card" style="border-top: 4px solid var(--delayed);">
+                <h3>Delayed</h3>
+                <div class="summary-number" id="metric-delayed" style="color: var(--delayed);">—</div>
             </div>
             <div class="summary-card" style="border-top: 4px solid var(--blocked);">
                 <h3>Blockers</h3>
-                <div class="summary-number" style="color: var(--blocked);">2</div>
+                <div class="summary-number" id="metric-blocked" style="color: var(--blocked);">—</div>
             </div>
+            <div class="summary-card" style="border-top: 4px solid var(--completed);">
+                <h3>Velocity</h3>
+                <div class="summary-number" id="metric-velocity" style="color: var(--completed);">—</div>
+            </div>
+        </div>
+
+        <!-- Velocity Trend Chart -->
+        <div class="velocity-chart">
+            <h3>📈 7-Day Velocity Trend (tasks resolved/day)</h3>
+            <div class="chart-container" id="velocity-bars"></div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all" onclick="filterStreams('all')">All</button>
+            <button class="filter-btn" data-filter="ontrack" onclick="filterStreams('ontrack')">✅ On Track</button>
+            <button class="filter-btn" data-filter="delayed" onclick="filterStreams('delayed')">⚠️ Delayed</button>
+            <button class="filter-btn" data-filter="blocked" onclick="filterStreams('blocked')">🚫 Blocked</button>
         </div>
 
         <!-- Layout Split -->
@@ -248,70 +491,21 @@
             <!-- Left Column: Work Streams -->
             <div>
                 <h2 class="section-title">🚀 Team Tracks & Workstreams</h2>
-                <div class="card">
-                    
-                    <!-- Stream 1 -->
-                    <div class="stream-item" style="padding-top: 0;">
-                        <div class="stream-header">
-                            <span class="stream-name">Frontend UI Kit Conversion</span>
-                            <span class="badge ontrack">On Track</span>
-                        </div>
-                        <p class="stream-desc">Design tokens synced. 8 out of 12 main dashboard views are completely migrated to Tailwind.</p>
-                    </div>
-
-                    <!-- Stream 2 -->
-                    <div class="stream-item">
-                        <div class="stream-header">
-                            <span class="stream-name">Auth Migration (OAuth2)</span>
-                            <span class="badge blocked">Blocked</span>
-                        </div>
-                        <p class="stream-desc">Backend integration stalled due to client certificate credential discrepancies. Testing paused.</p>
-                    </div>
-
-                    <!-- Stream 3 -->
-                    <div class="stream-item">
-                        <div class="stream-header">
-                            <span class="stream-name">Data Pipeline Scaling</span>
-                            <span class="badge delayed">Delayed</span>
-                        </div>
-                        <p class="stream-desc">Database re-indexing is taking longer than expected. Expected completion shifted by 2 days.</p>
-                    </div>
-
-                
-                    <!-- New Stream -->
-                    <div class="stream-item">
-                        <div class="stream-header">
-                            <span class="stream-name">Update</span>
-                            <span class="badge ontrack">On Track</span>
-                        </div>
-                        <p class="stream-desc">Testing the team updates log feature</p>
-                    </div>
-
-
-                    <!-- New Stream -->
-                    <div class="stream-item">
-                        <div class="stream-header">
-                            <span class="stream-name">Update</span>
-                            <span class="badge ontrack">On Track</span>
-                        </div>
-                        <p class="stream-desc">Testing the team updates log feature</p>
-                    </div>
-
-</div>
+                <div class="card" id="streams-container">
+                    <!-- Streams rendered by JS -->
+                </div>
             </div>
 
-            <!-- Right Column: Sidebar Alerts & Goals -->
+            <!-- Right Column: Sidebar -->
             <div>
                 <h2 class="section-title">⚠️ Active Blockers</h2>
-                <div class="blocker-box">
-                    <strong>Auth Certs:</strong> Waiting on DevOps team to issue the staging SSL keys for API handshakes.
+                <div id="blockers-container">
+                    <!-- Blockers rendered by JS -->
                 </div>
 
-                <h2 class="section-title" style="margin-top: 25px;">🎯 Next Milestones</h2>
-                <div class="card" style="padding: 15px; font-size: 13px;">
-                    <p style="margin: 0 0 8px 0;"><strong>June 5:</strong> Staging environment freeze.</p>
-                    <p style="margin: 0 0 8px 0;"><strong>June 12:</strong> Internal QA dry run.</p>
-                    <p style="margin: 0;"><strong>June 20:</strong> Beta Release v1.1.</p>
+                <h2 class="section-title" style="margin-top: 25px;">🎯 Milestones & Deadlines</h2>
+                <div class="card" style="padding: 12px 15px;" id="milestones-container">
+                    <!-- Milestones rendered by JS -->
                 </div>
             </div>
 
@@ -319,31 +513,343 @@
 
         <!-- Team Updates Log -->
         <div class="updates-log">
-            <h2 class="section-title">📝 Team Members Updates</h2>
+            <div class="updates-header">
+                <h2 class="section-title">📝 Team Activity Feed</h2>
+                <div class="filter-bar" style="margin-bottom: 0;">
+                    <button class="filter-btn active" data-logfilter="all" onclick="filterLogs('all')">All</button>
+                    <button class="filter-btn" data-logfilter="blocked" onclick="filterLogs('blocked')">Blockers</button>
+                    <button class="filter-btn" data-logfilter="progress" onclick="filterLogs('progress')">Progress</button>
+                </div>
+            </div>
             <div id="updates-container">
                 <!-- LOG_ENTRIES_START -->
-                                <div class="log-entry">
-                    <span class="log-author">Pratik Karanjule</span>
-                    <span class="log-message">Testing the team updates log feature</span>
-                    <span class="log-time">Jun 03, 07:35</span>
-                </div>
-                            <div class="log-entry" data-author="Sachin Mourya" data-time="Jun 03, 08:54" data-status="blocked">
-                <span class="log-message">Auth service is blocked waiting on DevOps certs</span>
-            </div>
-                        <div class="log-entry" data-author="Pratik Karanjule" data-time="Jun 03, 08:58" data-status="ontrack">
-                <span class="log-message">Frontend dashboard migration is 80% complete, finishing remaining 4 views this week</span>
-            </div>
-                        <div class="log-entry" data-author="Pratik Karanjule" data-time="Jun 03, 08:59" data-status="blocked">
-                <span class="log-message">Blocked on staging deployment, waiting on infra team to provision the new cluster</span>
-            </div>
-                        <div class="log-entry" data-author="Hitarth Rajpal" data-time="Jun 03, 09:06" data-status="delayed">
-                <span class="log-message">Pipeline scaling delayed by 2 days</span>
-            </div>
-            <!-- LOG_ENTRIES_END -->
+                <!-- Rendered by JS from updates.json -->
+                <!-- LOG_ENTRIES_END -->
             </div>
         </div>
 
+        <!-- Execution Analytics -->
+        <div class="analytics-section">
+            <div class="analytics-card">
+                <h3>📊 Execution Health</h3>
+                <div id="analytics-health">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+            <div class="analytics-card">
+                <h3>👥 Team Activity (Last 7 Days)</h3>
+                <div id="analytics-team">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+            <div class="analytics-card">
+                <h3>🔮 Predictive Insights</h3>
+                <div id="analytics-predictions">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dashboard-footer">
+            <span>Powered by NemoClaw Autonomous PM Agent</span>
+            <span id="footer-timestamp"></span>
+        </div>
     </div>
+
+    <script>
+    // ============================================================
+    // DATA LAYER — Load from JSON files
+    // ============================================================
+    let updatesData = [];
+    let milestonesData = [];
+    let velocityData = [];
+
+    async function loadData() {
+        try {
+            const [updatesRes, milestonesRes, velocityRes] = await Promise.all([
+                fetch('updates.json').then(r => r.json()).catch(() => []),
+                fetch('milestones.json').then(r => r.json()).catch(() => []),
+                fetch('velocity.json').then(r => r.json()).catch(() => [])
+            ]);
+            updatesData = updatesRes;
+            milestonesData = milestonesRes;
+            velocityData = velocityRes;
+        } catch(e) {
+            console.error('Data load error:', e);
+        }
+        renderAll();
+    }
+
+    // ============================================================
+    // RENDER FUNCTIONS
+    // ============================================================
+
+    function renderAll() {
+        renderMetrics();
+        renderVelocityChart();
+        renderStreams();
+        renderBlockers();
+        renderMilestones();
+        renderUpdates();
+        renderAnalytics();
+        renderRiskBanner();
+        updateTimestamps();
+    }
+
+    function renderMetrics() {
+        const streams = getStreams();
+        const ontrack = streams.filter(s => s.status === 'ontrack').length;
+        const delayed = streams.filter(s => s.status === 'delayed').length;
+        const blocked = streams.filter(s => s.status === 'blocked').length;
+        const progress = calculateProgress();
+        const velocity = velocityData.length > 0 
+            ? (velocityData.slice(-7).reduce((a, v) => a + v.tasks_completed, 0) / Math.min(velocityData.length, 7)).toFixed(1)
+            : '—';
+
+        document.getElementById('metric-progress').textContent = progress + '%';
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('metric-ontrack').textContent = ontrack;
+        document.getElementById('metric-delayed').textContent = delayed;
+        document.getElementById('metric-blocked').textContent = blocked;
+        document.getElementById('metric-velocity').textContent = velocity + '/d';
+    }
+
+    function renderVelocityChart() {
+        const container = document.getElementById('velocity-bars');
+        const last7 = velocityData.slice(-7);
+        if (last7.length === 0) {
+            container.innerHTML = '<span style="font-size:12px;color:var(--text-muted);">No velocity data yet. Updates will populate this chart.</span>';
+            return;
+        }
+        const maxVal = Math.max(...last7.map(d => d.tasks_completed), 1);
+        container.innerHTML = last7.map(d => {
+            const height = Math.max((d.tasks_completed / maxVal) * 100, 5);
+            const day = new Date(d.date).toLocaleDateString('en', {weekday: 'short'});
+            return `<div class="chart-bar" style="height:${height}%" title="${d.tasks_completed} tasks on ${d.date}"><span class="chart-label">${day}</span></div>`;
+        }).join('');
+    }
+
+    function getStreams() {
+        const statusMap = { blocked: 'blocked', blocker: 'blocked', delayed: 'delayed', ontrack: 'ontrack', completed: 'ontrack' };
+        const progressMap = { blocked: 30, blocker: 30, delayed: 50, ontrack: 60, completed: 100 };
+        return updatesData.map(u => ({
+            name: u.message.length > 50 ? u.message.substring(0, 50) + '...' : u.message,
+            status: statusMap[u.status] || 'ontrack',
+            desc: u.message,
+            owner: u.author,
+            progress: progressMap[u.status] || 50
+        }));
+    }
+
+    function calculateProgress() {
+        const streams = getStreams();
+        if (streams.length === 0) return 0;
+        return Math.round(streams.reduce((a, s) => a + s.progress, 0) / streams.length);
+    }
+
+    function renderStreams() {
+        const container = document.getElementById('streams-container');
+        const streams = getStreams();
+        container.innerHTML = streams.map((s, i) => `
+            <div class="stream-item ${i === 0 ? '' : ''}" data-status="${s.status}">
+                <div class="stream-header">
+                    <span class="stream-name">${s.name}</span>
+                    <span class="badge ${s.status}">${s.status === 'ontrack' ? 'On Track' : s.status === 'delayed' ? 'Delayed' : 'Blocked'}</span>
+                </div>
+                <p class="stream-desc">${s.desc}</p>
+                <div class="stream-owner">👤 ${s.owner}</div>
+                <div class="progress-container"><div class="progress-bar" style="width:${s.progress}%;background:var(--${s.status})"></div></div>
+            </div>
+        `).join('');
+    }
+
+    function renderBlockers() {
+        const container = document.getElementById('blockers-container');
+        const blockers = updatesData.filter(u => u.classification === 'blocker' && !u.resolved);
+        if (blockers.length === 0) {
+            container.innerHTML = '<div style="font-size:13px;color:var(--ontrack);padding:10px;">✅ No active blockers!</div>';
+            return;
+        }
+        container.innerHTML = blockers.map(b => `
+            <div class="blocker-box">
+                <strong>${b.author}:</strong> ${b.message}
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Reported: ${formatTime(b.timestamp)}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderMilestones() {
+        const container = document.getElementById('milestones-container');
+        const today = new Date();
+        container.innerHTML = milestonesData.map(m => {
+            const target = new Date(m.date);
+            const daysLeft = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+            let urgency = 'ok', label = `${daysLeft}d left`;
+            if (daysLeft <= 1) { urgency = 'urgent'; label = daysLeft <= 0 ? 'OVERDUE' : 'TOMORROW'; }
+            else if (daysLeft <= 5) { urgency = 'soon'; }
+            return `
+                <div class="milestone-item">
+                    <span class="milestone-date">${formatDate(m.date)}</span>
+                    <span>${m.name}</span>
+                    <span class="milestone-countdown ${urgency}">${label}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderUpdates(filter = 'all') {
+        const container = document.getElementById('updates-container');
+        let entries = [...updatesData].reverse();
+        if (filter === 'blocked') entries = entries.filter(e => e.classification === 'blocker');
+        else if (filter === 'progress') entries = entries.filter(e => e.classification === 'progress');
+
+        container.innerHTML = entries.map(e => `
+            <div class="log-entry status-${e.status || 'task'}">
+                <div class="log-status-dot ${e.status || 'task'}"></div>
+                <span class="log-author">${e.author}</span>
+                <span class="log-message">${e.message}</span>
+                <span class="log-time">${formatTime(e.timestamp)}</span>
+            </div>
+        `).join('');
+    }
+
+    function renderAnalytics() {
+        // Execution Health
+        const healthEl = document.getElementById('analytics-health');
+        const totalUpdates = updatesData.length;
+        const blockerCount = updatesData.filter(u => u.classification === 'blocker' && !u.resolved).length;
+        const resolvedCount = updatesData.filter(u => u.resolved).length;
+        const blockerRatio = totalUpdates > 0 ? Math.round((blockerCount / totalUpdates) * 100) : 0;
+
+        healthEl.innerHTML = `
+            <div class="analytics-item"><span>Total Updates</span><span class="analytics-value">${totalUpdates}</span></div>
+            <div class="analytics-item"><span>Active Blockers</span><span class="analytics-value ${blockerCount > 2 ? 'danger' : 'good'}">${blockerCount}</span></div>
+            <div class="analytics-item"><span>Resolved Issues</span><span class="analytics-value good">${resolvedCount}</span></div>
+            <div class="analytics-item"><span>Blocker Ratio</span><span class="analytics-value ${blockerRatio > 30 ? 'danger' : blockerRatio > 15 ? 'warning' : 'good'}">${blockerRatio}%</span></div>
+        `;
+
+        // Team Activity
+        const teamEl = document.getElementById('analytics-team');
+        const authorCounts = {};
+        updatesData.forEach(u => { authorCounts[u.author] = (authorCounts[u.author] || 0) + 1; });
+        const sortedAuthors = Object.entries(authorCounts).sort((a, b) => b[1] - a[1]);
+        teamEl.innerHTML = sortedAuthors.map(([name, count]) => `
+            <div class="analytics-item"><span>${name}</span><span class="analytics-value">${count} updates</span></div>
+        `).join('') || '<div style="font-size:12px;color:var(--text-muted);">No activity data</div>';
+
+        // Predictions
+        const predictEl = document.getElementById('analytics-predictions');
+        const velocity = velocityData.length > 0 
+            ? velocityData.slice(-7).reduce((a, v) => a + v.tasks_completed, 0) / Math.min(velocityData.length, 7)
+            : 0;
+        const progress = calculateProgress();
+        const remainingWork = 100 - progress;
+        const estDays = velocity > 0 ? Math.ceil(remainingWork / (velocity * 10)) : '∞';
+        
+        const nextMilestone = milestonesData.length > 0 ? milestonesData[0] : null;
+        const daysToMilestone = nextMilestone ? Math.ceil((new Date(nextMilestone.date) - new Date()) / (1000*60*60*24)) : null;
+        const atRisk = daysToMilestone !== null && estDays !== '∞' && estDays > daysToMilestone;
+
+        predictEl.innerHTML = `
+            <div class="analytics-item"><span>Est. Days to 100%</span><span class="analytics-value ${atRisk ? 'danger' : 'good'}">${estDays} days</span></div>
+            <div class="analytics-item"><span>Next Milestone</span><span class="analytics-value">${daysToMilestone !== null ? daysToMilestone + 'd' : '—'}</span></div>
+            <div class="analytics-item"><span>Schedule Risk</span><span class="analytics-value ${atRisk ? 'danger' : 'good'}">${atRisk ? 'AT RISK' : 'On Track'}</span></div>
+            <div class="analytics-item"><span>Avg Velocity</span><span class="analytics-value">${velocity.toFixed(1)} tasks/day</span></div>
+        `;
+    }
+
+    function renderRiskBanner() {
+        const banner = document.getElementById('risk-banner');
+        const messageEl = document.getElementById('risk-message');
+        
+        // Check: any blocker that blocks an upcoming milestone
+        const unblockers = updatesData.filter(u => u.classification === 'blocker' && !u.resolved);
+        const nextMilestone = milestonesData[0];
+        if (!nextMilestone) { banner.style.display = 'none'; return; }
+        
+        const daysLeft = Math.ceil((new Date(nextMilestone.date) - new Date()) / (1000*60*60*24));
+        
+        if (unblockers.length > 0 && daysLeft <= 3) {
+            banner.style.display = 'flex';
+            messageEl.textContent = `CRITICAL: ${unblockers.length} active blocker(s) with "${nextMilestone.name}" due in ${daysLeft} day(s). Immediate action required.`;
+        } else if (unblockers.length > 0 && daysLeft <= 7) {
+            banner.style.display = 'flex';
+            messageEl.textContent = `WARNING: ${unblockers.length} unresolved blocker(s) may impact "${nextMilestone.name}" (${daysLeft} days away).`;
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
+
+    function formatTime(ts) {
+        const d = new Date(ts);
+        return d.toLocaleDateString('en', {month: 'short', day: '2-digit'}) + ', ' + d.toLocaleTimeString('en', {hour: '2-digit', minute: '2-digit', hour12: false});
+    }
+
+    function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en', {month: 'short', day: 'numeric'});
+    }
+
+    function updateTimestamps() {
+        const now = new Date();
+        document.getElementById('last-updated').textContent = 'Last Updated: ' + now.toLocaleDateString('en', {month: 'long', day: '2-digit', year: 'numeric'}) + ' ' + now.toLocaleTimeString('en', {hour: '2-digit', minute: '2-digit'});
+        document.getElementById('footer-timestamp').textContent = 'Auto-refreshed: ' + now.toLocaleTimeString();
+        
+        // Calculate week number
+        const start = new Date(now.getFullYear(), 0, 1);
+        const weekNo = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+        document.getElementById('week-label').textContent = `Week ${weekNo} Update`;
+    }
+
+    // ============================================================
+    // INTERACTIVITY
+    // ============================================================
+
+    function filterStreams(status) {
+        document.querySelectorAll('.filter-bar .filter-btn[data-filter]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === status);
+        });
+        document.querySelectorAll('.stream-item').forEach(item => {
+            if (status === 'all') { item.classList.remove('hidden'); }
+            else { item.classList.toggle('hidden', item.dataset.status !== status); }
+        });
+    }
+
+    function filterLogs(type) {
+        document.querySelectorAll('[data-logfilter]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.logfilter === type);
+        });
+        renderUpdates(type);
+    }
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        document.querySelector('.theme-toggle').textContent = next === 'dark' ? '☀️' : '🌙';
+        localStorage.setItem('theme', next);
+    }
+
+    // Load saved theme
+    (function() {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+    })();
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    loadData();
+    </script>
 
 </body>
 </html>
