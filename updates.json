@@ -34,14 +34,5 @@
     "status": "ontrack",
     "classification": "task",
     "resolved": false
-  },
-  {
-    "id": "u0005",
-    "author": "SandboxTest",
-    "message": "Test from sandbox",
-    "timestamp": "2026-06-08T07:51:18.194765",
-    "status": "ontrack",
-    "classification": "task",
-    "resolved": false
   }
 ]
