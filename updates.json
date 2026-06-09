@@ -43,5 +43,14 @@
     "status": "ontrack",
     "classification": "task",
     "resolved": false
+  },
+  {
+    "id": "u0006",
+    "author": "TestUser",
+    "message": "test connectivity",
+    "timestamp": "2026-06-09T11:08:19.995188",
+    "status": "ontrack",
+    "classification": "task",
+    "resolved": false
   }
 ]
